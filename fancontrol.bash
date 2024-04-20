@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source config.bash
+#source config.bash
 
 # Restart Bluetooth service
 sudo service bluetooth restart
@@ -11,8 +11,11 @@ sudo ./dell-bios 0
 sudo rm dell-bios
 
 # declare current temparature value variable
+declare -i minimum
+declare -i maximum
 declare -i cur_temp
-
+minimum=40
+maximum=50
 
 while true; do
     cur_temp=$(sensors | grep "CPU:" | awk '{gsub(/[^0-9.-]/,"",$2); printf "%.0f\n", $2}')
@@ -27,5 +30,4 @@ while true; do
         i8kctl fan 2 2
     fi
 
-    sleep 2
 done

@@ -1,23 +1,30 @@
 #!/bin/bash
-# Function to read config values
-read_config() {
-    source config.bash
-}
+if [ "$EUID" -ne 0 ]; then
+    echo "This script must be run as root."
+    exit 1
+fi
+apt install i8kutils -y
+apt install lm-sensors -y
+# Prompt the user for input
+read -p "Enter the minimum threshold temperature : " minimum
+read -p "Enter the minimum threshold temperature : " maximum
+if [[ "$minimum" =~ ^[0-9]+$ ]]; then
+    sed -i "s/^minimum=.*/minimum=$minimum/" fancontrol.bash
 
-# Function to write config values
-write_config() {
-    sed -i "s/avg=.*/avg=$1/" config.bash
-    sed -i "s/max=.*/max=$2/" config.bash
-}
+    echo "Minimum value updated successfully."
+else
+    echo "Invalid input. Please enter an integer."
+fi
+if [[ "$maximum" =~ ^[0-9]+$ ]]; then
+    sed -i "s/^maximum=.*/maximum=$maximum/" fancontrol.bash
 
-read_config
-read -p "Enter new average temperature (default: $avg): " new_avg
-read -p "Enter new maximum temperature (default: $max): " new_max
-
-new_avg=${new_avg:-$minimum}
-new_max=${new_max:-$maximum}
-
-i8kctl fan 1 1
-
-# Write new configuration values
-write_config "$new_avg" "$new_max"
+    echo "Maximum value updated successfully."
+else
+    echo "Invalid input. Please enter an integer."
+fi
+cp rc-local.service /etc/rc-local.service
+cp fancontrol.bash /etc/rc.local
+chmod +x /etc/rc.local
+systemctl enable rc-local.service
+systemctl start rc-local.service
+systemctl status rc-local.service
