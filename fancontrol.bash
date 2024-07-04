@@ -14,8 +14,8 @@ sudo rm dell-bios
 declare -i minimum
 declare -i maximum
 declare -i cur_temp
-minimum=40
-maximum=50
+minimum=30
+maximum=45
 
 while true; do
     cur_temp=$(sensors | grep "CPU:" | awk '{gsub(/[^0-9.-]/,"",$2); printf "%.0f\n", $2}')
@@ -29,5 +29,5 @@ while true; do
     else
         i8kctl fan 2 2
     fi
-
+    sleep .5
 done
